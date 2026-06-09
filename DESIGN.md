@@ -7,7 +7,26 @@
 | LLM | Ollama + llama3.2:3b |
 | Embeddings | Ollama nomic-embed-text (local, 768-dim) |
 | Vector DB | Qdrant (Docker) |
-| Wikipedia fetch | Wikipedia REST API |
+| Wikipedia fetch | Wikipedia REST API (JSON) |
+
+## Why Wikipedia REST API Returns JSON (and Why We Use It)
+
+Wikipedia exposes two APIs. We use both:
+
+| API | Format | What we use it for |
+|---|---|---|
+| `page/summary/{title}` | JSON | Lead paragraph (`extract` field) |
+| `action=query&prop=extracts` | JSON | Full article text with `== Section ==` markers |
+
+**Why JSON over raw HTML scraping:**
+- JSON is structured and predictable — same keys for every article, every time
+- No need to parse HTML tags, strip infoboxes, remove citation markers `[1]`, or handle navboxes
+- `extract` field returns clean plain text — no `<p>`, `<span>`, `<sup>` tags to clean
+- The action API's `explaintext=true` parameter returns the full article as plain text with `== Section ==` markers — perfect for our section-boundary chunker
+- HTML scraping is fragile — Wikipedia's HTML structure changes; the REST API is versioned and stable
+- Official Wikipedia-recommended approach for programmatic access
+
+**The user still pastes a normal URL** (`https://en.wikipedia.org/wiki/Karachi`). We extract the title from the URL and call the API server-side — the user never sees the API calls.
 
 ## Why Qdrant over Chroma
 
