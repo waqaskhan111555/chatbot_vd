@@ -9,6 +9,18 @@
 | Vector DB | Qdrant (Docker) |
 | Wikipedia fetch | Wikipedia REST API |
 
+## Why Qdrant over Chroma
+
+| | Qdrant | Chroma |
+|---|---|---|
+| Docker Compose | Single image, persistent, production-ready | Primarily designed as in-process/embedded |
+| Persistence | Survives container restarts via named volume | Defaults to in-memory; needs extra config to persist |
+| JS client | Official `@qdrant/js-client-rest` — stable REST API | JS client less mature than its Python counterpart |
+| Performance | Written in Rust — fast | Written in Python — fine for small apps |
+| Production fit | Standalone service by design | More of a dev/prototyping tool |
+
+The brief requires the vector DB to run as part of the containerised stack, not as an in-process toy. Qdrant is built from the ground up as a standalone service — `docker run -p 6333:6333 qdrant/qdrant` just works. Chroma's natural mode is embedded in-process, making it a weaker fit for this requirement.
+
 ## Data Flow
 `
 URL ? /api/ingest ? scrape Wikipedia ? chunk by section ? embed ? store in Qdrant
