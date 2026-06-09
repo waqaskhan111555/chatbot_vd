@@ -24,3 +24,9 @@ Currently every chat request is stateless — the LLM has no memory of previous 
 - Makes the chat context-aware: follow-up questions like "tell me more about that" would work correctly
 - Redis fits naturally into the Docker Compose stack as an additional service
 - Session keys can be tied to a browser session ID (cookie) so each user has isolated history
+
+**7. Sentence-level fallback for oversized single paragraphs**
+The chunker splits on `\n\n` (paragraph boundaries). If a single paragraph exceeds 1800 chars with no `\n\n` inside it, it becomes an oversized chunk — because splitting mid-paragraph would destroy context. For Wikipedia this is acceptable (largest single paragraph ~3000 chars, well within nomic-embed-text's 8192 token limit). For general web pages a sentence-level fallback (`split on . ! ?`) would be needed to handle extreme cases safely.
+
+**8. Metadata stored in Qdrant but not used for filtering**
+Each chunk stores `articleTitle`, `sectionTitle`, `chunkIndex`, `url` as payload. Currently only `text` is sent to the LLM. With more time, `sectionTitle` could be shown in the UI alongside each answer ("Answer sourced from: History section") to improve transparency and trust in RAG responses.
