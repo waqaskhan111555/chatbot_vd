@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# chatbot-vd
 
-## Getting Started
+A RAG-based chat application over Wikipedia articles, powered by a local LLM via Ollama and Qdrant as the vector store.
 
-First, run the development server:
+## Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Ollama](https://ollama.com/download) (only needed for local dev without Docker)
+
+## Run with Docker (recommended)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This starts:
+- `app` — Next.js on http://localhost:3000
+- `qdrant` — Qdrant vector DB on port 6333
+- `ollama` — Ollama LLM runtime on port 11434
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> **Note:** First run pulls `llama3.2:3b` (~2GB) and `nomic-embed-text` (~270MB). Takes a few minutes.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Run locally (without Docker)
 
-## Learn More
+```bash
+# 1. Install Ollama from https://ollama.com/download then:
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
 
-To learn more about Next.js, take a look at the following resources:
+# 2. Start Qdrant
+docker run -d -p 6333:6333 qdrant/qdrant
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 3. Copy env and start app
+cp .env.example .env.local
+# edit .env.local: OLLAMA_BASE_URL=http://localhost:11434 and QDRANT_URL=http://localhost:6333
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+Open http://localhost:3000
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How to use
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Paste a Wikipedia URL e.g. `https://en.wikipedia.org/wiki/Karachi`
+2. Click **Load** — app scrapes, chunks, embeds, and stores the article
+3. Read the generated summary
+4. Ask questions in the chat box
+
+## Run tests
+
+```bash
+npm test               # unit tests
+npm run test:coverage  # with coverage report
+```
+
+Coverage: **95.58% lines** (requirement: 85%)
+
+## Environment variables
+
+See `.env.example` for all required variables.
+
+## Caveats
+
+- First LLM response is slow (~10-30s) — model loads into RAM on first call
+- `llama3.2:3b` runs on CPU if no GPU — slower but functional
+- Only English Wikipedia URLs supported
+- Each new article replaces the previous one in Qdrant
