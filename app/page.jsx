@@ -34,7 +34,7 @@ export default function Home() {
       const sumRes = await fetch("/api/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: data.lead || data.title }),
+        body: JSON.stringify({ text: data.summaryText || data.lead || data.title }),
       });
       const reader = sumRes.body.getReader();
       const decoder = new TextDecoder();

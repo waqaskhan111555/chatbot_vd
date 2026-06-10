@@ -19,7 +19,14 @@ export async function POST(request) {
     await resetCollection();
     await upsertChunks(chunks, vectors);
 
-    return Response.json({ success: true, title: article.title, lead: article.lead, chunkCount: chunks.length });
+    // Build richer summary text: lead + first two sections
+    const sectionText = article.sections
+      .slice(0, 2)
+      .flatMap((s) => s.paragraphs)
+      .join("\n\n");
+    const summaryText = [article.lead, sectionText].filter(Boolean).join("\n\n").slice(0, 3000);
+
+    return Response.json({ success: true, title: article.title, lead: article.lead, summaryText, chunkCount: chunks.length });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }
