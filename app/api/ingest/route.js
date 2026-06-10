@@ -19,7 +19,7 @@ export async function POST(request) {
     await resetCollection();
     await upsertChunks(chunks, vectors);
 
-    return Response.json({ success: true, title: article.title, chunkCount: chunks.length });
+    return Response.json({ success: true, title: article.title, lead: article.lead, chunkCount: chunks.length });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }
