@@ -36,3 +36,6 @@ Currently any question is passed directly to the LLM. Adding a guardrail layer �
 
 **10. Improved prompt engineering for security**
 The current RAG prompt is functional but basic. With more time I would harden it with explicit prompt engineering techniques: stricter system-role instructions, an "instruction hierarchy" that makes the context override any user-injected directives, and a post-response filter that checks whether the answer cites only the provided chunks. This reduces prompt injection risk and prevents the model from hallucinating or leaking system instructions.
+
+**11. Source citation in answers**
+The LLM currently returns a plain answer with no indication of which part of the article it came from. Instructing the model to append `[Source: <sectionTitle>]` to every response — using the `sectionTitle` already stored in the Qdrant payload — would make RAG grounding visible to the user. This directly addresses the core RAG transparency problem: users can verify the answer comes from a real section of the article rather than a hallucination.
