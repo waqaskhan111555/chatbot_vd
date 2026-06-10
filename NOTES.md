@@ -30,3 +30,9 @@ The chunker splits on `\n\n` (paragraph boundaries). If a single paragraph excee
 
 **8. Metadata stored in Qdrant but not used for filtering**
 Each chunk stores `articleTitle`, `sectionTitle`, `chunkIndex`, `url` as payload. Currently only `text` is sent to the LLM. With more time, `sectionTitle` could be shown in the UI alongside each answer ("Answer sourced from: History section") to improve transparency and trust in RAG responses.
+
+**9. Input guardrails**
+Currently any question is passed directly to the LLM. Adding a guardrail layer — a lightweight classifier or a preflight LLM call that checks whether the question is relevant to the loaded article — would prevent the model from responding to off-topic, harmful, or irrelevant queries and keep the chat focused on the ingested content.
+
+**10. Improved prompt engineering for security**
+The current RAG prompt is functional but basic. With more time I would harden it with explicit prompt engineering techniques: stricter system-role instructions, an "instruction hierarchy" that makes the context override any user-injected directives, and a post-response filter that checks whether the answer cites only the provided chunks. This reduces prompt injection risk and prevents the model from hallucinating or leaking system instructions.
